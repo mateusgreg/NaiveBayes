@@ -31,7 +31,7 @@ public class Document {
     /**
      * List of token counts
      */
-    public Map<String, Integer> tokens;
+    public Map<String, Double> tokens;
     
     /**
      * The class of the document

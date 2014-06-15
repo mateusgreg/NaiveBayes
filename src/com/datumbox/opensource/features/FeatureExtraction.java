@@ -18,7 +18,13 @@ package com.datumbox.opensource.features;
 
 import com.datumbox.opensource.dataobjects.Document;
 import com.datumbox.opensource.dataobjects.FeatureStats;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +67,7 @@ public class FeatureExtraction {
                 stats.categoryCounts.put(category, categoryCount+1);
             }
             
-            for(Map.Entry<String, Integer> entry : doc.tokens.entrySet()) {
+            for(Map.Entry<String, Double> entry : doc.tokens.entrySet()) {
                 feature = entry.getKey();
                 
                 //get the counts of the feature in the categories
@@ -92,7 +98,8 @@ public class FeatureExtraction {
      * @param criticalLevel
      * @return 
      */
-    public Map<String, Double> chisquare(FeatureStats stats, double criticalLevel) {
+    public Map<String, Double> chisquare(FeatureStats stats, int numberFeatures) {
+        Map<String, Double> featuresMap = new HashMap<>();
         Map<String, Double> selectedFeatures = new HashMap<>();
         
         String feature;
@@ -102,7 +109,8 @@ public class FeatureExtraction {
         int N1dot, N0dot, N00, N01, N10, N11;
         double chisquareScore;
         Double previousScore;
-        for(Map.Entry<String, Map<String, Integer>> entry1 : stats.featureCategoryJointCount.entrySet()) {
+        
+        for (Map.Entry<String, Map<String, Integer>> entry1 : stats.featureCategoryJointCount.entrySet()) {
             feature = entry1.getKey();
             categoryList = entry1.getValue();
             
@@ -126,17 +134,53 @@ public class FeatureExtraction {
                 //calculate the chisquare score based on the above statistics
                 chisquareScore = stats.n*Math.pow(N11*N00-N10*N01, 2)/((N11+N01)*(N11+N10)*(N10+N00)*(N01+N00));
                 
-                //if the score is larger than the critical value then add it in the list
-                if(chisquareScore>=criticalLevel) {
-                    previousScore = selectedFeatures.get(feature);
-                    if(previousScore==null || chisquareScore>previousScore) {
-                        selectedFeatures.put(feature, chisquareScore);
-                    }
+                previousScore = featuresMap.get(feature);
+                if (previousScore == null || chisquareScore > previousScore) {
+                	featuresMap.put(feature, chisquareScore);
                 }
             }
         }
         
+        featuresMap = sortByComparator(featuresMap);
+        
+        for(Map.Entry<String, Double> entry2 : featuresMap.entrySet()) {
+        	if (selectedFeatures.size() < numberFeatures) {
+        		selectedFeatures.put(entry2.getKey(), entry2.getValue());
+        	}
+        	else {
+        		break;
+        	}
+        }
+        
         return selectedFeatures;
     }
+    
+    private static Map sortByComparator(Map unsortMap) {
+    	 
+		List list = new LinkedList(unsortMap.entrySet());
+ 
+		// sort list based on comparator
+		Collections.sort(list, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Comparable) ((Map.Entry) (o1)).getValue()).compareTo(((Map.Entry) (o2)).getValue());
+			}
+		});
+ 
+		// put sorted list into map again
+                //LinkedHashMap make sure order in which keys were inserted
+		Map sortedMap = new LinkedHashMap();
+		for (Iterator it = list.iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			sortedMap.put(entry.getKey(), entry.getValue());
+		}
+		
+		return sortedMap;
+	}
+ 
+	public static void printMap(Map<String, String> map){
+		for (Map.Entry entry : map.entrySet()) {
+			System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+		}
+	}
 }
 
