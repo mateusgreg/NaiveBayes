@@ -160,11 +160,7 @@ public class FeatureExtraction {
 		List list = new LinkedList(unsortMap.entrySet());
  
 		// sort list based on comparator
-		Collections.sort(list, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((Comparable) ((Map.Entry) (o1)).getValue()).compareTo(((Map.Entry) (o2)).getValue());
-			}
-		});
+		Collections.sort(list, Collections.reverseOrder());
  
 		// put sorted list into map again
                 //LinkedHashMap make sure order in which keys were inserted
