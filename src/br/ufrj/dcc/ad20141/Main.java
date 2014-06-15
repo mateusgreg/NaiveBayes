@@ -23,6 +23,8 @@ public class Main {
 
 		Double[][] spambase = readDataset("resources/datasets/spambase.data");
 		
+		
+		//DEFINE NORMAIS PARA CADA FEATURE - MODELO DE SPAM E MODELO DE NAO-SPAM:
 		NormalDistribution[] normalSpam = new NormalDistribution[FEATURES];
 		NormalDistribution[] normalNSpam = new NormalDistribution[FEATURES];
 		
@@ -35,6 +37,7 @@ public class Main {
 		}
 
 
+		//COMPARA RESULTADO DA PROB. DO MODELO DE SPAM COM O RESULTADO DA PROB. DO MODELO DE NAO-SPAM, PARA CADA FEATURE:
 		Double [] percentHit = new Double[FEATURES];
 		for(int feature = 0; feature<FEATURES; feature++){
 			System.out.println("feature: " + feature);
@@ -62,6 +65,8 @@ public class Main {
 		System.out.println();
 
 
+		//10 MELHORES FEATURES ESCOLHIDAS MANUALMENTE, OLHANDO O PERCENT HIT.
+		//USANDO AS 10 FEATURES ESCOLHIDAS, CALCULAMOS O PRODUTORIO DAS PROBABILIDADES DO MODELO DE SPAM E DO MODELO DE NAO-SPAA, E AVALIAMOS O PERCENTUAL DE ACERTOS.
 		int countErrosSpam = 0;
 		int[] features = {2,4,6,15,20,22,23,51,52,55};
 		System.out.println("features: {2,4,6,15,20,22,23,51,52,55}");
@@ -69,6 +74,7 @@ public class Main {
 			double sumNormalSpam = Math.log(percentSpam);
 			double sumNormalNSpam = Math.log(percentNSpam);
 			for(int j = 0; j < features.length; j++){
+				//LOG APLICADO AO PRODUTORIO = SOMA DOS LOGS APLICADOS A CADA FEATURE:
 				sumNormalSpam += Math.log(normalSpam[features[j]].probability(spambase[i][features[j]] - DELTA, spambase[i][features[j]] + DELTA));
 				sumNormalNSpam += Math.log(normalNSpam[features[j]].probability(spambase[i][features[j]] - DELTA, spambase[i][features[j]] + DELTA));
 			}
@@ -125,6 +131,7 @@ public class Main {
 		System.out.println("percentual acerto: " + (1.0 - 1.0*(countErrosSpam + countErrosNSpam)/INSTANCES));
 	}
 
+	
 	public static Double[][] readDataset(String datasetPath) {
 		Double [][] spambase = new Double[INSTANCES][FEATURES];
 		
